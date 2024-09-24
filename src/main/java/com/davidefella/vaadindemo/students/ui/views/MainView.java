@@ -1,6 +1,7 @@
 package com.davidefella.vaadindemo.students.ui.views;
 
 import com.davidefella.vaadindemo.students.model.Student;
+import com.davidefella.vaadindemo.students.security.SecurityService;
 import com.davidefella.vaadindemo.students.service.StudentService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -16,20 +17,24 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
 @Route("")
+@PermitAll
 public class MainView extends VerticalLayout {
 
     private final StudentService studentService;
+    private final SecurityService securityService; // Inietta il servizio di sicurezza
     private final Grid<Student> studentGrid;
 
-   
     @Autowired
-    public MainView(StudentService studentService) {
+    public MainView(StudentService studentService, SecurityService securityService) {
         this.studentService = studentService;
+        this.securityService = securityService;  // Inizializza il servizio di sicurezza
         this.studentGrid = new Grid<>(Student.class);
 
         // Rimuove padding e margini dal layout principale per eliminare i gap
@@ -95,42 +100,48 @@ public class MainView extends VerticalLayout {
     private void createNavbar() {
         // Crea il layout orizzontale per la barra di navigazione
         HorizontalLayout navbar = new HorizontalLayout();
-        navbar.setWidthFull(); // Occupa tutta la larghezza
-        navbar.setPadding(true); // Aggiungi padding
-        navbar.getStyle().set("background-color", "green"); // Sfondo verde per la barra di navigazione
-        navbar.getStyle().set("color", "white"); // Testo bianco per il contrasto
-        navbar.getStyle().set("position", "fixed"); // Posiziona la barra in modo fisso
-        navbar.getStyle().set("top", "0"); // Fissa la barra in alto
-        navbar.getStyle().set("left", "0"); // Fissa la barra sul lato sinistro
-        navbar.getStyle().set("right", "0"); // Fissa la barra sul lato destro
-        navbar.getStyle().set("z-index", "1000"); // Imposta un alto z-index per evitare che venga coperta
+        navbar.setWidthFull();  // Occupa tutta la larghezza
+        navbar.setPadding(true);  // Aggiungi padding
+        navbar.getStyle().set("background-color", "green");  // Sfondo verde per la barra di navigazione
+        navbar.getStyle().set("color", "white");  // Testo bianco per il contrasto
+        navbar.getStyle().set("position", "fixed");  // Posiziona la barra in modo fisso
+        navbar.getStyle().set("top", "0");  // Fissa la barra in alto
+        navbar.getStyle().set("left", "0");  // Fissa la barra sul lato sinistro
+        navbar.getStyle().set("right", "0");  // Fissa la barra sul lato destro
+        navbar.getStyle().set("z-index", "1000");  // Imposta un alto z-index per evitare che venga coperta
 
-        // Crea i link per la barra di navigazione con padding extra e dimensione del
-        // testo ridotta
+        // Crea i link per la barra di navigazione con padding extra e dimensione del testo ridotta
         Anchor chiSiamo = new Anchor("under-construction", "Chi siamo");
-        chiSiamo.getStyle().set("padding", "0 2rem"); // Aggiungi più spazio tra le voci usando `rem`
-        chiSiamo.getStyle().set("font-size", "0.9rem"); // Riduci leggermente la dimensione del font
+        chiSiamo.getStyle().set("padding", "0 2rem");  // Aggiungi più spazio tra le voci usando `rem`
+        chiSiamo.getStyle().set("font-size", "0.9rem");  // Riduci leggermente la dimensione del font
 
         Anchor servizi = new Anchor("under-construction", "Servizi");
-        servizi.getStyle().set("padding", "0 2rem"); // Aggiungi più spazio tra le voci usando `rem`
-        servizi.getStyle().set("font-size", "0.9rem"); // Riduci leggermente la dimensione del font
+        servizi.getStyle().set("padding", "0 2rem");  // Aggiungi più spazio tra le voci usando `rem`
+        servizi.getStyle().set("font-size", "0.9rem");  // Riduci leggermente la dimensione del font
 
         Anchor contatti = new Anchor("under-construction", "Contatti");
-        contatti.getStyle().set("padding", "0 2rem"); // Aggiungi più spazio tra le voci usando `rem`
-        contatti.getStyle().set("font-size", "0.9rem"); // Riduci leggermente la dimensione del font
+        contatti.getStyle().set("padding", "0 2rem");  // Aggiungi più spazio tra le voci usando `rem`
+        contatti.getStyle().set("font-size", "0.9rem");  // Riduci leggermente la dimensione del font
+
+        // Link di logout in alto a destra
+        Anchor logoutLink = new Anchor("", "Logout");  // Crea il link di logout
+        logoutLink.getStyle().set("padding", "0 2rem");  // Aggiungi più spazio tra le voci usando `rem`
+        logoutLink.getStyle().set("font-size", "0.9rem");  // Riduci leggermente la dimensione del font
+        logoutLink.getElement().addEventListener("click", event -> {
+            securityService.logout();  // Chiama il metodo di logout dal SecurityService
+        });
 
         // Spazio a sinistra per simulare logo o titolo
         Div spacer = new Div();
 
         // Aggiungi i link al layout di navigazione
-        navbar.add(spacer, chiSiamo, servizi, contatti);
-        navbar.setAlignItems(FlexComponent.Alignment.CENTER); // Allinea verticalmente al centro
-        navbar.setJustifyContentMode(FlexComponent.JustifyContentMode.END); // Allinea i link a destra
+        navbar.add(spacer, chiSiamo, servizi, contatti, logoutLink);
+        navbar.setAlignItems(Alignment.CENTER);  // Allinea verticalmente al centro
+        navbar.setJustifyContentMode(JustifyContentMode.END);  // Allinea i link a destra
 
         // Aggiungi la barra di navigazione al layout principale
         add(navbar);
     }
-
     
     private void configureGrid() {
         studentGrid.setWidthFull();

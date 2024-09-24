@@ -15,7 +15,7 @@ public class StudentService {
     public StudentService() {
         this.dummyDB = new ArrayList<>();
         // Aggiungi alcuni studenti di esempio all'inizio
-        dummyDB.add(new Student(1L, "Davide", "Fella", "davide@example.com"));
+        dummyDB.add(new Student(1L, "Davide", "Gialli", "davide@example.com"));
         dummyDB.add(new Student(2L, "Mario", "Rossi", "mario@example.com"));
         dummyDB.add(new Student(3L, "Luigi", "Verdi", "luigi@example.com"));
     }

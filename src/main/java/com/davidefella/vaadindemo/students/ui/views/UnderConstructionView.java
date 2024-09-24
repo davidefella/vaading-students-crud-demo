@@ -1,5 +1,6 @@
 package com.davidefella.vaadindemo.students.ui.views;
 
+import com.davidefella.vaadindemo.students.security.SecurityService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -8,19 +9,26 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Route("under-construction")  // Imposta il percorso per questa vista
+@PermitAll
 public class UnderConstructionView extends VerticalLayout {
 
-    public UnderConstructionView() {
+    private final SecurityService securityService;
+
+    @Autowired
+    public UnderConstructionView(SecurityService securityService) {
+        this.securityService = securityService;
+
         // Aggiungi la navbar
         createNavbar();
 
         // Messaggio di "Under Construction"
         H1 message = new H1("Sito in Costruzione");
 
-
-                // Pulsante Home
+        // Pulsante Home
         Button homeButton = new Button("Home", event -> {
             // Naviga alla rotta principale ("/")
             getUI().ifPresent(ui -> ui.navigate(""));
@@ -36,7 +44,7 @@ public class UnderConstructionView extends VerticalLayout {
         add(layout);
     }
 
-    // Copia il metodo createNavbar per mantenere la navbar
+    // Metodo per creare la navbar con link di logout
     private void createNavbar() {
         HorizontalLayout navbar = new HorizontalLayout();
         navbar.setWidthFull();
@@ -61,8 +69,14 @@ public class UnderConstructionView extends VerticalLayout {
         contatti.getStyle().set("padding", "0 2rem");
         contatti.getStyle().set("font-size", "0.9rem");
 
+        // Link di logout in alto a destra
+        Anchor logoutLink = new Anchor("", "Logout");  // Crea il link di logout
+        logoutLink.getElement().addEventListener("click", event -> {
+            securityService.logout();  // Chiama il metodo di logout dal SecurityService
+        });
+
         Div spacer = new Div();
-        navbar.add(spacer, chiSiamo, servizi, contatti);
+        navbar.add(spacer, chiSiamo, servizi, contatti, logoutLink);
         navbar.setAlignItems(FlexComponent.Alignment.CENTER);
         navbar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
