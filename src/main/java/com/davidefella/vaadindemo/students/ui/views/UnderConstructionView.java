@@ -12,7 +12,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route("under-construction")  // Imposta il percorso per questa vista
+@Route("under-construction")
 @PermitAll
 public class UnderConstructionView extends VerticalLayout {
 
@@ -22,29 +22,22 @@ public class UnderConstructionView extends VerticalLayout {
     public UnderConstructionView(SecurityService securityService) {
         this.securityService = securityService;
 
-        // Aggiungi la navbar
         createNavbar();
 
-        // Messaggio di "Under Construction"
         H1 message = new H1("Sito in Costruzione");
 
-        // Pulsante Home
         Button homeButton = new Button("Home", event -> {
-            // Naviga alla rotta principale ("/")
             getUI().ifPresent(ui -> ui.navigate(""));
         });
 
-        // Layout principale
         VerticalLayout layout = new VerticalLayout(message, homeButton);
-        layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);  // Centra gli elementi
+        layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         layout.setSizeFull();
         layout.setAlignItems(Alignment.CENTER);
 
-        // Aggiungi il messaggio e il pulsante alla vista
         add(layout);
     }
 
-    // Metodo per creare la navbar con link di logout
     private void createNavbar() {
         HorizontalLayout navbar = new HorizontalLayout();
         navbar.setWidthFull();
@@ -69,10 +62,9 @@ public class UnderConstructionView extends VerticalLayout {
         contatti.getStyle().set("padding", "0 2rem");
         contatti.getStyle().set("font-size", "0.9rem");
 
-        // Link di logout in alto a destra
-        Anchor logoutLink = new Anchor("", "Logout");  // Crea il link di logout
+        Anchor logoutLink = new Anchor("", "Logout");
         logoutLink.getElement().addEventListener("click", event -> {
-            securityService.logout();  // Chiama il metodo di logout dal SecurityService
+            securityService.logout();
         });
 
         Div spacer = new Div();

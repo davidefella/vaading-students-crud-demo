@@ -28,38 +28,33 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 public class MainView extends VerticalLayout {
 
     private final StudentService studentService;
-    private final SecurityService securityService; // Inietta il servizio di sicurezza
+    private final SecurityService securityService;
     private final Grid<Student> studentGrid;
 
     @Autowired
     public MainView(StudentService studentService, SecurityService securityService) {
         this.studentService = studentService;
-        this.securityService = securityService;  // Inizializza il servizio di sicurezza
+        this.securityService = securityService;
         this.studentGrid = new Grid<>(Student.class);
 
         // Rimuove padding e margini dal layout principale per eliminare i gap
         getStyle().set("margin", "0");
         getStyle().set("padding", "0");
 
-        setSizeFull();  // Imposta il layout per occupare l'intera finestra del browser
-        setDefaultHorizontalComponentAlignment(Alignment.CENTER); // Centra il layout orizzontalmente
+        setSizeFull(); // Imposta il layout per occupare l'intera finestra del browser
+        setDefaultHorizontalComponentAlignment(Alignment.CENTER);
 
-        // Barra di navigazione
         createNavbar();
 
-        // Layout flessibile per centrare titolo e griglia
         VerticalLayout centerLayout = new VerticalLayout();
-        centerLayout.setSizeFull();  // Occupa tutto lo spazio disponibile
-        centerLayout.setAlignItems(Alignment.CENTER);  // Centra orizzontalmente
+        centerLayout.setSizeFull();
+        centerLayout.setAlignItems(Alignment.CENTER);
 
-        // Titolo
         H1 title = new H1("Gestione Studenti");
         centerLayout.add(title);
 
-        // Configura la griglia
         configureGrid();
 
-        // Wrapper per centrare la griglia
         Div gridWrapper = new Div(studentGrid);
         gridWrapper.setWidth("66.66%");
         gridWrapper.getStyle().set("display", "flex");
@@ -67,248 +62,205 @@ public class MainView extends VerticalLayout {
         gridWrapper.getStyle().set("margin", "0");
         gridWrapper.getStyle().set("padding", "0");
 
-        // Layout per griglia e pulsante
         VerticalLayout gridAndButtonLayout = new VerticalLayout();
         gridAndButtonLayout.setWidthFull();
-        gridAndButtonLayout.setAlignItems(Alignment.END);  // Allinea i componenti a destra
-        gridAndButtonLayout.add(gridWrapper);  // Aggiunge la griglia
+        gridAndButtonLayout.setAlignItems(Alignment.END);
+        gridAndButtonLayout.add(gridWrapper);
 
-        // Pulsante per aggiungere uno studente
         Button addStudentButton = new Button("Aggiungi Studente", event -> {
-            createAddStudentDialog();  // Chiama il metodo che apre il modale
+            createAddStudentDialog(); // Chiama il metodo che apre il modale
         });
 
-        // Aggiungi il pulsante alla parte destra subito sotto la griglia
         gridAndButtonLayout.add(addStudentButton);
 
-        // Nel layout per griglia e pulsante, centriamo il contenuto tranne il pulsante
-        gridAndButtonLayout.setAlignItems(Alignment.CENTER);  // Centra il titolo e la griglia
+        gridAndButtonLayout.setAlignItems(Alignment.CENTER); // Centra il titolo e la griglia
 
-        // Solo il pulsante deve essere allineato a destra
         gridAndButtonLayout.setHorizontalComponentAlignment(Alignment.CENTER, addStudentButton);
 
-        // Aggiungi il layout centrato al layout principale
         centerLayout.add(gridAndButtonLayout);
 
-        // Aggiungi il layout principale alla vista
         add(centerLayout);
 
-        // Imposta i dati della griglia con gli studenti dal servizio
         updateStudentList();
     }
 
     private void createNavbar() {
-        // Crea il layout orizzontale per la barra di navigazione
         HorizontalLayout navbar = new HorizontalLayout();
-        navbar.setWidthFull();  // Occupa tutta la larghezza
-        navbar.setPadding(true);  // Aggiungi padding
-        navbar.getStyle().set("background-color", "green");  // Sfondo verde per la barra di navigazione
-        navbar.getStyle().set("color", "white");  // Testo bianco per il contrasto
-        navbar.getStyle().set("position", "fixed");  // Posiziona la barra in modo fisso
-        navbar.getStyle().set("top", "0");  // Fissa la barra in alto
-        navbar.getStyle().set("left", "0");  // Fissa la barra sul lato sinistro
-        navbar.getStyle().set("right", "0");  // Fissa la barra sul lato destro
-        navbar.getStyle().set("z-index", "1000");  // Imposta un alto z-index per evitare che venga coperta
+        navbar.setWidthFull();
+        navbar.setPadding(true);
+        navbar.getStyle().set("background-color", "green");
+        navbar.getStyle().set("color", "white");
+        navbar.getStyle().set("position", "fixed");
+        navbar.getStyle().set("top", "0");
+        navbar.getStyle().set("left", "0");
+        navbar.getStyle().set("right", "0");
+        navbar.getStyle().set("z-index", "1000");
 
-        // Crea i link per la barra di navigazione con padding extra e dimensione del testo ridotta
         Anchor chiSiamo = new Anchor("under-construction", "Chi siamo");
-        chiSiamo.getStyle().set("padding", "0 2rem");  // Aggiungi più spazio tra le voci usando `rem`
-        chiSiamo.getStyle().set("font-size", "0.9rem");  // Riduci leggermente la dimensione del font
+        chiSiamo.getStyle().set("padding", "0 2rem");
+        chiSiamo.getStyle().set("font-size", "0.9rem");
 
         Anchor servizi = new Anchor("under-construction", "Servizi");
-        servizi.getStyle().set("padding", "0 2rem");  // Aggiungi più spazio tra le voci usando `rem`
-        servizi.getStyle().set("font-size", "0.9rem");  // Riduci leggermente la dimensione del font
+        servizi.getStyle().set("padding", "0 2rem");
+        servizi.getStyle().set("font-size", "0.9rem");
 
         Anchor contatti = new Anchor("under-construction", "Contatti");
-        contatti.getStyle().set("padding", "0 2rem");  // Aggiungi più spazio tra le voci usando `rem`
-        contatti.getStyle().set("font-size", "0.9rem");  // Riduci leggermente la dimensione del font
+        contatti.getStyle().set("padding", "0 2rem");
+        contatti.getStyle().set("font-size", "0.9rem");
 
-        // Link di logout in alto a destra
-        Anchor logoutLink = new Anchor("", "Logout");  // Crea il link di logout
-        logoutLink.getStyle().set("padding", "0 2rem");  // Aggiungi più spazio tra le voci usando `rem`
-        logoutLink.getStyle().set("font-size", "0.9rem");  // Riduci leggermente la dimensione del font
+        Anchor logoutLink = new Anchor("", "Logout");
+        logoutLink.getStyle().set("padding", "0 2rem");
+        logoutLink.getStyle().set("font-size", "0.9rem");
         logoutLink.getElement().addEventListener("click", event -> {
-            securityService.logout();  // Chiama il metodo di logout dal SecurityService
+            securityService.logout();
         });
 
-        // Spazio a sinistra per simulare logo o titolo
         Div spacer = new Div();
 
-        // Aggiungi i link al layout di navigazione
         navbar.add(spacer, chiSiamo, servizi, contatti, logoutLink);
-        navbar.setAlignItems(Alignment.CENTER);  // Allinea verticalmente al centro
-        navbar.setJustifyContentMode(JustifyContentMode.END);  // Allinea i link a destra
+        navbar.setAlignItems(Alignment.CENTER);
+        navbar.setJustifyContentMode(JustifyContentMode.END);
 
-        // Aggiungi la barra di navigazione al layout principale
         add(navbar);
     }
-    
+
     private void configureGrid() {
         studentGrid.setWidthFull();
-    
+
         studentGrid.setColumns("firstName", "lastName", "email");
         studentGrid.getColumnByKey("firstName").setHeader("Nome");
         studentGrid.getColumnByKey("lastName").setHeader("Cognome");
         studentGrid.getColumnByKey("email").setHeader("Email");
-    
-        // Aggiungi una colonna con l'icona di modifica
+
         studentGrid.addComponentColumn(student -> {
-            // Crea l'icona di modifica
             Icon editIcon = new Icon(VaadinIcon.PENCIL);
             editIcon.getStyle().set("cursor", "pointer");
             editIcon.setColor("blue");
-    
-            // Aggiungi l'azione di modifica
+
             editIcon.addClickListener(click -> {
-                showEditStudentDialog(student);  // Mostra il modale per modificare lo studente
+                showEditStudentDialog(student);
             });
-    
+
             return editIcon;
-        }).setHeader("Modifica");  // Imposta l'header della colonna
-    
-        // Aggiungi una colonna con l'icona di cancellazione
+        }).setHeader("Modifica");
+
         studentGrid.addComponentColumn(student -> {
-            // Crea l'icona di cancellazione
             Icon deleteIcon = new Icon(VaadinIcon.TRASH);
             deleteIcon.getStyle().set("cursor", "pointer");
             deleteIcon.setColor("red");
-    
-            // Aggiungi l'azione di cancellazione
+
             deleteIcon.addClickListener(click -> {
-                showDeleteConfirmationDialog(student);  // Mostra il modale di conferma prima di cancellare
+                showDeleteConfirmationDialog(student);
             });
-    
+
             return deleteIcon;
-        }).setHeader("Cancella");  // Imposta l'header della colonna
-    
-        // Imposta le colonne in modo che siano tutte adattate automaticamente
+        }).setHeader("Cancella");
+
         studentGrid.getColumns().forEach(col -> col.setAutoWidth(true));
-    
+
         studentGrid.setAllRowsVisible(true);
         studentGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
     }
 
-    // Metodo per aggiornare i dati della griglia con gli studenti
     private void updateStudentList() {
-        studentGrid.setItems(studentService.findAll()); // Popola la griglia con gli studenti
+        studentGrid.setItems(studentService.findAll());
     }
 
     private void createAddStudentDialog() {
         Dialog dialog = new Dialog();
 
-        // Creiamo i campi per il form
         TextField firstNameField = new TextField("Nome");
         TextField lastNameField = new TextField("Cognome");
         TextField emailField = new TextField("Email");
 
-        // Layout per il form
         FormLayout formLayout = new FormLayout();
         formLayout.add(firstNameField, lastNameField, emailField);
 
-        // Pulsante per confermare l'aggiunta dello studente
         Button saveButton = new Button("Salva", event -> {
-            // Validazione di base
+
             if (firstNameField.isEmpty() || lastNameField.isEmpty() || emailField.isEmpty()) {
                 Notification.show("Per favore, compila tutti i campi");
             } else {
-                // Crea e salva il nuovo studente
+
                 Student newStudent = new Student(firstNameField.getValue(), lastNameField.getValue(),
                         emailField.getValue());
-                studentService.save(newStudent); // Salva il nuovo studente
-                updateStudentList(); // Aggiorna la griglia con il nuovo studente
-                dialog.close(); // Chiudi il modale
+                studentService.save(newStudent);
+                updateStudentList();
+                dialog.close();
             }
         });
 
-        // Layout del bottone
         VerticalLayout dialogLayout = new VerticalLayout(formLayout, saveButton);
         dialog.add(dialogLayout);
 
-        // Apri il dialog
         dialog.open();
     }
 
     private void showDeleteConfirmationDialog(Student student) {
         Dialog dialog = new Dialog();
-    
-        // Testo di conferma
+
         Div confirmText = new Div();
-        confirmText.setText("Sei sicuro di voler eliminare lo studente " + student.getFirstName() + " " + student.getLastName() + "?");
-    
-        // Pulsante per confermare la cancellazione
+        confirmText.setText("Sei sicuro di voler eliminare lo studente " + student.getFirstName() + " "
+                + student.getLastName() + "?");
+
         Button confirmButton = new Button("Conferma", event -> {
-            studentService.delete(student);  // Cancella lo studente
-            updateStudentList();  // Aggiorna la griglia
-            dialog.close();  // Chiudi il dialogo
-            Notification.show("Studente eliminato con successo!");  // Mostra una notifica
+            studentService.delete(student);
+            updateStudentList();
+            dialog.close();
+            Notification.show("Studente eliminato con successo!");
         });
-    
-        // Pulsante per annullare l'azione
+
         Button cancelButton = new Button("Annulla", event -> {
-            dialog.close();  // Chiudi il dialogo senza cancellare
+            dialog.close();
         });
-    
-        // Layout per i pulsanti
+
         HorizontalLayout buttonsLayout = new HorizontalLayout(confirmButton, cancelButton);
-    
-        // Aggiungi tutto al dialogo
+
         VerticalLayout dialogLayout = new VerticalLayout(confirmText, buttonsLayout);
         dialog.add(dialogLayout);
-    
-        // Mostra il dialogo
+
         dialog.open();
     }
-
 
     private void showEditStudentDialog(Student student) {
         Dialog dialog = new Dialog();
-    
-        // Crea i campi con i valori precompilati
+
         TextField firstNameField = new TextField("Nome");
-        firstNameField.setValue(student.getFirstName());  // Precompila il nome
-    
+        firstNameField.setValue(student.getFirstName());
+
         TextField lastNameField = new TextField("Cognome");
-        lastNameField.setValue(student.getLastName());  // Precompila il cognome
-    
+        lastNameField.setValue(student.getLastName());
+
         TextField emailField = new TextField("Email");
-        emailField.setValue(student.getEmail());  // Precompila l'email
-        emailField.setReadOnly(true);  // Rendi il campo email non modificabile
-    
-        // Layout per il form
+        emailField.setValue(student.getEmail());
+        emailField.setReadOnly(true);
+
         FormLayout formLayout = new FormLayout();
         formLayout.add(firstNameField, lastNameField, emailField);
-        
-        // Pulsante per confermare la modifica
+
         Button saveButton = new Button("Salva modifiche", event -> {
-            // Validazione di base
             if (firstNameField.isEmpty() || lastNameField.isEmpty()) {
                 Notification.show("Per favore, compila tutti i campi");
             } else {
-                // Aggiorna i dati dello studente
                 student.setFirstName(firstNameField.getValue());
                 student.setLastName(lastNameField.getValue());
-    
-                studentService.save(student);  // Salva le modifiche dello studente
-                updateStudentList();  // Aggiorna la griglia
-                dialog.close();  // Chiudi il modale
-                Notification.show("Studente modificato con successo!");  // Mostra una notifica
+
+                studentService.save(student);
+                updateStudentList();
+                dialog.close();
+                Notification.show("Studente modificato con successo!");
             }
         });
-    
-        // Pulsante per annullare l'azione
+
         Button cancelButton = new Button("Annulla", event -> {
-            dialog.close();  // Chiudi il dialogo senza modificare
+            dialog.close();
         });
-    
-        // Layout per i pulsanti
+
         HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, cancelButton);
-    
-        // Aggiungi tutto al dialogo
+
         VerticalLayout dialogLayout = new VerticalLayout(formLayout, buttonsLayout);
         dialog.add(dialogLayout);
-    
-        // Mostra il dialogo
+
         dialog.open();
     }
-    
 }
