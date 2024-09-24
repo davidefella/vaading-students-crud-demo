@@ -8,5 +8,4 @@ import org.springframework.stereotype.Component;
 @Component
 @Theme(themeClass = Material.class)
 public class AppShell implements AppShellConfigurator {
-    // Qui puoi aggiungere configurazioni aggiuntive se necessario
 }

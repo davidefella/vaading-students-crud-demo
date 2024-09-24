@@ -1,24 +1,22 @@
 package com.davidefella.vaadindemo.students.ui.views;
 
 import com.davidefella.vaadindemo.students.model.Student;
-import com.davidefella.vaadindemo.students.security.SecurityService;
 import com.davidefella.vaadindemo.students.service.StudentService;
+import com.davidefella.vaadindemo.students.ui.views.components.Navbar;
+import com.davidefella.vaadindemo.students.ui.views.components.StudentFormDialog;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -28,33 +26,28 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 public class MainView extends VerticalLayout {
 
     private final StudentService studentService;
-    private final SecurityService securityService;
     private final Grid<Student> studentGrid;
 
     @Autowired
-    public MainView(StudentService studentService, SecurityService securityService) {
+    public MainView(StudentService studentService, Navbar navbar) {
         this.studentService = studentService;
-        this.securityService = securityService;
         this.studentGrid = new Grid<>(Student.class);
 
         // Rimuove padding e margini dal layout principale per eliminare i gap
         getStyle().set("margin", "0");
         getStyle().set("padding", "0");
-
         setSizeFull(); // Imposta il layout per occupare l'intera finestra del browser
         setDefaultHorizontalComponentAlignment(Alignment.CENTER);
 
-        createNavbar();
+        add(navbar);
 
         VerticalLayout centerLayout = new VerticalLayout();
         centerLayout.setSizeFull();
         centerLayout.setAlignItems(Alignment.CENTER);
-
         H1 title = new H1("Gestione Studenti");
         centerLayout.add(title);
 
         configureGrid();
-
         Div gridWrapper = new Div(studentGrid);
         gridWrapper.setWidth("66.66%");
         gridWrapper.getStyle().set("display", "flex");
@@ -68,7 +61,7 @@ public class MainView extends VerticalLayout {
         gridAndButtonLayout.add(gridWrapper);
 
         Button addStudentButton = new Button("Aggiungi Studente", event -> {
-            createAddStudentDialog(); // Chiama il metodo che apre il modale
+            createAddStudentDialog();
         });
 
         gridAndButtonLayout.add(addStudentButton);
@@ -82,46 +75,6 @@ public class MainView extends VerticalLayout {
         add(centerLayout);
 
         updateStudentList();
-    }
-
-    private void createNavbar() {
-        HorizontalLayout navbar = new HorizontalLayout();
-        navbar.setWidthFull();
-        navbar.setPadding(true);
-        navbar.getStyle().set("background-color", "green");
-        navbar.getStyle().set("color", "white");
-        navbar.getStyle().set("position", "fixed");
-        navbar.getStyle().set("top", "0");
-        navbar.getStyle().set("left", "0");
-        navbar.getStyle().set("right", "0");
-        navbar.getStyle().set("z-index", "1000");
-
-        Anchor chiSiamo = new Anchor("under-construction", "Chi siamo");
-        chiSiamo.getStyle().set("padding", "0 2rem");
-        chiSiamo.getStyle().set("font-size", "0.9rem");
-
-        Anchor servizi = new Anchor("under-construction", "Servizi");
-        servizi.getStyle().set("padding", "0 2rem");
-        servizi.getStyle().set("font-size", "0.9rem");
-
-        Anchor contatti = new Anchor("under-construction", "Contatti");
-        contatti.getStyle().set("padding", "0 2rem");
-        contatti.getStyle().set("font-size", "0.9rem");
-
-        Anchor logoutLink = new Anchor("", "Logout");
-        logoutLink.getStyle().set("padding", "0 2rem");
-        logoutLink.getStyle().set("font-size", "0.9rem");
-        logoutLink.getElement().addEventListener("click", event -> {
-            securityService.logout();
-        });
-
-        Div spacer = new Div();
-
-        navbar.add(spacer, chiSiamo, servizi, contatti, logoutLink);
-        navbar.setAlignItems(Alignment.CENTER);
-        navbar.setJustifyContentMode(JustifyContentMode.END);
-
-        add(navbar);
     }
 
     private void configureGrid() {
@@ -167,31 +120,11 @@ public class MainView extends VerticalLayout {
     }
 
     private void createAddStudentDialog() {
-        Dialog dialog = new Dialog();
-
-        TextField firstNameField = new TextField("Nome");
-        TextField lastNameField = new TextField("Cognome");
-        TextField emailField = new TextField("Email");
-
-        FormLayout formLayout = new FormLayout();
-        formLayout.add(firstNameField, lastNameField, emailField);
-
-        Button saveButton = new Button("Salva", event -> {
-
-            if (firstNameField.isEmpty() || lastNameField.isEmpty() || emailField.isEmpty()) {
-                Notification.show("Per favore, compila tutti i campi");
-            } else {
-
-                Student newStudent = new Student(firstNameField.getValue(), lastNameField.getValue(),
-                        emailField.getValue());
-                studentService.save(newStudent);
-                updateStudentList();
-                dialog.close();
-            }
+        StudentFormDialog dialog = new StudentFormDialog(null, student -> {
+            studentService.save(student);
+            updateStudentList();
+            Notification.show("Studente aggiunto con successo!");
         });
-
-        VerticalLayout dialogLayout = new VerticalLayout(formLayout, saveButton);
-        dialog.add(dialogLayout);
 
         dialog.open();
     }
@@ -200,26 +133,23 @@ public class MainView extends VerticalLayout {
         Dialog dialog = new Dialog();
 
         Div confirmText = new Div();
-        confirmText.setText("Sei sicuro di voler eliminare lo studente " + student.getFirstName() + " "
-                + student.getLastName() + "?");
+        confirmText.setText("Sei sicuro di voler eliminare lo studente " + student.getFirstName() + " " + student.getLastName() + "?");
 
         Button confirmButton = new Button("Conferma", event -> {
-            studentService.delete(student);
-            updateStudentList();
+            studentService.delete(student);  // Elimina lo studente
+            updateStudentList();  // Aggiorna la griglia
             dialog.close();
-            Notification.show("Studente eliminato con successo!");
+            Notification.show("Studente eliminato con successo!");  // Mostra notifica
         });
 
-        Button cancelButton = new Button("Annulla", event -> {
-            dialog.close();
-        });
+        Button cancelButton = new Button("Annulla", event -> dialog.close());  // Chiudi il dialogo se annullato
 
         HorizontalLayout buttonsLayout = new HorizontalLayout(confirmButton, cancelButton);
 
         VerticalLayout dialogLayout = new VerticalLayout(confirmText, buttonsLayout);
         dialog.add(dialogLayout);
 
-        dialog.open();
+        dialog.open();  // Mostra il dialog di conferma
     }
 
     private void showEditStudentDialog(Student student) {
