@@ -1,4 +1,4 @@
-package com.davidefella.vaadindemo.students.ui.views.components;
+package com.davidefella.vaadindemo.students.ui.views.components.navbar;
 
 import com.davidefella.vaadindemo.students.security.SecurityService;
 import com.vaadin.flow.component.html.Anchor;

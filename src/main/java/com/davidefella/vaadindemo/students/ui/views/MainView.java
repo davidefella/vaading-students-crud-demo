@@ -2,8 +2,8 @@ package com.davidefella.vaadindemo.students.ui.views;
 
 import com.davidefella.vaadindemo.students.model.Student;
 import com.davidefella.vaadindemo.students.service.StudentService;
-import com.davidefella.vaadindemo.students.ui.views.components.Navbar;
-import com.davidefella.vaadindemo.students.ui.views.components.StudentFormDialog;
+import com.davidefella.vaadindemo.students.ui.views.components.navbar.Navbar;
+import com.davidefella.vaadindemo.students.ui.views.components.grid.StudentFormDialog;
 import com.davidefella.vaadindemo.students.ui.views.components.grid.StudentGrid;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -27,19 +27,20 @@ public class MainView extends VerticalLayout {
         this.studentService = studentService;
         this.studentGrid = new StudentGrid(this::showEditStudentDialog, this::showDeleteConfirmationDialog);
 
-        // Rimuove padding e margini dal layout principale per eliminare i gap
-        getStyle().set("margin", "0");
-        getStyle().set("padding", "0");
+        // Layout setup
+        setupLayout(navbar);
+        updateStudentList();
+    }
+
+    private void setupLayout(Navbar navbar) {
         setSizeFull();
         setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-
         add(navbar);
 
         VerticalLayout centerLayout = new VerticalLayout();
         centerLayout.setSizeFull();
         centerLayout.setAlignItems(Alignment.CENTER);
-        H1 title = new H1("Gestione Studenti");
-        centerLayout.add(title);
+        centerLayout.add(new H1("Gestione Studenti"));
 
         Div gridWrapper = new Div(studentGrid);
         gridWrapper.setWidth("66.66%");
@@ -58,8 +59,6 @@ public class MainView extends VerticalLayout {
 
         centerLayout.add(gridAndButtonLayout);
         add(centerLayout);
-
-        updateStudentList();
     }
 
     private void updateStudentList() {
@@ -67,12 +66,19 @@ public class MainView extends VerticalLayout {
     }
 
     private void createAddStudentDialog() {
-        StudentFormDialog dialog = new StudentFormDialog(null, student -> {
+        new StudentFormDialog(null, student -> {
             studentService.save(student);
             updateStudentList();
             Notification.show("Studente aggiunto con successo!");
-        });
-        dialog.open();
+        }).open();
+    }
+
+    private void showEditStudentDialog(Student student) {
+        new StudentFormDialog(student, updatedStudent -> {
+            studentService.save(updatedStudent);
+            updateStudentList();
+            Notification.show("Studente modificato con successo!");
+        }).open();
     }
 
     private void showDeleteConfirmationDialog(Student student) {
@@ -86,18 +92,9 @@ public class MainView extends VerticalLayout {
             dialog.close();
             Notification.show("Studente eliminato con successo!");
         });
-
+    
         Button cancelButton = new Button("Annulla", event -> dialog.close());
         dialog.getFooter().add(confirmButton, cancelButton);
-        dialog.open();
-    }
-
-    private void showEditStudentDialog(Student student) {
-        StudentFormDialog dialog = new StudentFormDialog(student, updatedStudent -> {
-            studentService.save(updatedStudent);  // Salva lo studente aggiornato
-            updateStudentList();
-            Notification.show("Studente modificato con successo!");
-        });
         dialog.open();
     }
 }

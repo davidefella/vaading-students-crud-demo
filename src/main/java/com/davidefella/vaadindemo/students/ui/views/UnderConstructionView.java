@@ -1,7 +1,7 @@
 package com.davidefella.vaadindemo.students.ui.views;
 
 import com.davidefella.vaadindemo.students.security.SecurityService;
-import com.davidefella.vaadindemo.students.ui.views.components.Navbar;
+import com.davidefella.vaadindemo.students.ui.views.components.navbar.Navbar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
